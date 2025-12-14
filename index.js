@@ -1,40 +1,34 @@
-import fetch from "node-fetch";
+const fetch = require("node-fetch");
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const CHAT_ID = "@Crypto_TonPrice"; // ضع اسم قناتك هنا
+const CHAT_ID = "@Crypto_TonPrice"; // اسم القناة العامة
 
-const coins = [
-  { id: "bitcoin", symbol: "BTC" },
-  { id: "ethereum", symbol: "ETH" },
-  { id: "binancecoin", symbol: "BNB" },
-  { id: "solana", symbol: "SOL" },
-  { id: "ripple", symbol: "XRP" },
-  { id: "the-open-network", symbol: "TON" }
-];
+const symbols = ["BTC", "ETH", "BNB", "SOL", "XRP", "TON"];
 
-async function run() {
-  const ids = coins.map(c => c.id).join(",");
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+async function runBot() {
+  try {
+    let msg = "⚡️ Crypto Market Update\n\n";
 
-  const res = await fetch(url);
-  const data = await res.json();
+    for (const symbol of symbols) {
+      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${symbol.toLowerCase()}&vs_currencies=usd`);
+      const data = await res.json();
+      const price = data[symbol.toLowerCase()]?.usd;
+      if (!price) continue;
 
-  let msg = "⚡ Crypto Prices\n\n";
+      msg += `#${symbol}: $${price}\n`;
+    }
 
-  coins.forEach(c => {
-    const price = data[c.id]?.usd;
-    if (!price) return;
-    msg += `💰 #${c.symbol}: $${price}\n`;
-  });
+    const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+    await fetch(telegramUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: CHAT_ID, text: msg })
+    });
 
-  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: CHAT_ID,
-      text: msg
-    })
-  });
+    console.log("✅ Message sent to Telegram!");
+  } catch (e) {
+    console.error("❌ Error:", e.message);
+  }
 }
 
-run();
+runBot();
