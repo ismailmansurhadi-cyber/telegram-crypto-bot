@@ -1,33 +1,31 @@
 const axios = require("axios");
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const CHAT_ID = "@Crypto_TonPrice";
+const CHAT_ID = "@Crypto_TonPrice"; // أو استخدم الرقم الرقمي للـ chat_id
 
-const symbols = ["bitcoin","ethereum","binancecoin","solana","ripple","toncoin"];
+const symbols = ["BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT","XRPUSDT","TONUSDT"];
 
 async function runBot() {
-  try {
-    let msg = "⚡️ Crypto Market Update\n\n";
+  let msg = "⚡️ Crypto Market Update\n\n";
 
-    for (const symbol of symbols) {
-      const res = await axios.get("https://api.coingecko.com/api/v3/simple/price", {
-        params: { ids: symbol, vs_currencies: "usd" }
-      });
-
-      const price = res.data[symbol]?.usd;
-      if (!price) continue;
-
-      msg += `#${symbol.toUpperCase()}: $${price}\n`;
+  for (const symbol of symbols) {
+    try {
+      const res = await axios.get(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+      const price = parseFloat(res.data.price).toFixed(2);
+      msg += `#${symbol.replace("USDT","")}: $${price}\n`;
+    } catch (err) {
+      msg += `#${symbol.replace("USDT","")}: ❌ Error fetching price\n`;
     }
+  }
 
+  try {
     await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       chat_id: CHAT_ID,
       text: msg
     });
-
-    console.log("✅ Message sent!");
-  } catch (e) {
-    console.error("❌ Error:", e.message);
+    console.log("✅ Message sent to Telegram!");
+  } catch (err) {
+    console.error("❌ Telegram error:", err.message);
   }
 }
 
