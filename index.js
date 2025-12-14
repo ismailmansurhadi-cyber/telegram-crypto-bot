@@ -17,10 +17,10 @@ async function runBot() {
       const price = res.data[symbol]?.usd;
       if (!price) continue;
 
-      msg += #${symbol.toUpperCase()}: $${price}\n;
+      msg += `#${symbol.toUpperCase()}: $${price}\n`;
     }
 
-    await axios.post(https://api.telegram.org/bot${BOT_TOKEN}/sendMessage, {
+    await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       chat_id: CHAT_ID,
       text: msg
     });
