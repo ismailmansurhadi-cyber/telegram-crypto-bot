@@ -10,6 +10,7 @@ async function runBot() {
     let msg = "⚡️ Crypto Market Update\n\n";
 
     for (const symbol of symbols) {
+      // ✅ استخدم backticks لتصحيح template literal
       const res = await fetch(https://api.coingecko.com/api/v3/simple/price?ids=${symbol}&vs_currencies=usd);
       const data = await res.json();
       const price = data[symbol]?.usd;
