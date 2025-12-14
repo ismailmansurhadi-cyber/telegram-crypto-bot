@@ -1,44 +1,33 @@
 const axios = require("axios");
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const CHAT_ID = "@Crypto_TonPrice"; // اسم القناة
+const CHAT_ID = "@Crypto_TonPrice";
 
-const symbols = [
-  { id: "bitcoin", label: "BTC" },
-  { id: "ethereum", label: "ETH" },
-  { id: "binancecoin", label: "BNB" },
-  { id: "solana", label: "SOL" },
-  { id: "ripple", label: "XRP" },
-  { id: "toncoin", label: "TON" }
-];
+const symbols = ["bitcoin","ethereum","binancecoin","solana","ripple","toncoin"];
 
 async function runBot() {
   try {
     let msg = "⚡️ Crypto Market Update\n\n";
 
     for (const symbol of symbols) {
-      const res = await axios.get(https://api.coingecko.com/api/v3/simple/price, {
-        params: {
-          ids: symbol.id,
-          vs_currencies: "usd"
-        }
+      const res = await axios.get("https://api.coingecko.com/api/v3/simple/price", {
+        params: { ids: symbol, vs_currencies: "usd" }
       });
 
-      const price = res.data[symbol.id]?.usd;
+      const price = res.data[symbol]?.usd;
       if (!price) continue;
 
-      msg += #${symbol.label}: $${price}\n;
+      msg += #${symbol.toUpperCase()}: $${price}\n;
     }
 
-    const telegramUrl = https://api.telegram.org/bot${BOT_TOKEN}/sendMessage;
-    await axios.post(telegramUrl, {
+    await axios.post(https://api.telegram.org/bot${BOT_TOKEN}/sendMessage, {
       chat_id: CHAT_ID,
       text: msg
     });
 
-    console.log("✅ Message sent to Telegram!");
-  } catch (err) {
-    console.error("❌ Error:", err.message);
+    console.log("✅ Message sent!");
+  } catch (e) {
+    console.error("❌ Error:", e.message);
   }
 }
 
